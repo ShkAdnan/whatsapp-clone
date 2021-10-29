@@ -23,7 +23,8 @@ const Sidebar = () => {
      
         if(!input) return null;
         const chatExists = await chatAlreadyExists(input);
-        
+        console.log(chatExists);
+        return;
         if(EmailValidator.validate(input) && !chatExists && input != user.email ){
             const chats = collection( db , "chats");
             await setDoc(doc(chats), {
@@ -40,7 +41,7 @@ const Sidebar = () => {
         chatSnapShot?.forEach((doc) => {
             result = !!(doc.data().users.find(user => user === repcipientEmail)?.length > 0 ) ;
             //if empty turns false
-            if(result) return result;
+            if(result === true) { return result };
         });
 
         return result;
