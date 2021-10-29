@@ -4,6 +4,7 @@ import {  db, auth } from './../firebase'
 import Login from './login';
 import Loading from '../components/Loading';
 import { useEffect } from 'react';
+import { collection, doc, setDoc } from "firebase/firestore"; 
 
 
 function MyApp({ Component, pageProps }) {
@@ -11,13 +12,16 @@ function MyApp({ Component, pageProps }) {
   const [ user, loading  ] = useAuthState(auth);
 
   //Adding User to Firebase database
-  useEffect(()=> {
+  useEffect( async () => {
     if( user ){
-      db.collection('users').doc(user.uid).set({
+      const users = collection(db, "users");
+
+      await setDoc(doc(users, user.uid), {
         email :  user.email,
         lastSeen : new Date().getTime(),
-        photoUrl : user.photoUrl
-      },{ merge : true })
+        photoUrl : user.photoURL
+      },
+      { merge : true});
     }
   }, [user]);
 

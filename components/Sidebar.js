@@ -4,22 +4,54 @@ import ChatIcon from '@material-ui/icons/Chat';
 import MoreVertIcon from '@material-ui/icons/MoreVert'
 import  SearchIcon  from "@material-ui/icons/Search";
 import * as EmailValidator from 'email-validator';
+import { signOut } from "firebase/auth"
+import { db, auth } from "../firebase";
+import { collection, doc, setDoc, query, where, getDocs } from "firebase/firestore"; 
+import { useAuthState } from "react-firebase-hooks/auth";
+import { useCollection } from "react-firebase-hooks/firestore";
+import { useEffect } from 'react';
+import { async } from "@firebase/util";
 
 const Sidebar = () => {
+    const [ user ] = useAuthState( auth );
+    //Checking if chat already exists
+    const userChatRef = query(collection(db, "chats"), where("users", "array-contains", user.email));
     
-    const createChat = () => {
-        const input = prompt("Please enter email you wish to chat with");
-        if(!input) return null;
+    const createChat = async () => {
 
-        if(EmailValidator.validate(input)){
-            
+        const input = prompt("Please enter email you wish to chat with");
+     
+        if(!input) return null;
+        const chatExists = await chatAlreadyExists(input);
+        
+        if(EmailValidator.validate(input) && !chatExists && input != user.email ){
+            const chats = collection( db , "chats");
+            await setDoc(doc(chats), {
+                users : [ user.email, input ]
+            });
+
         }
+    }
+
+    const chatAlreadyExists = async (repcipientEmail) => {
+        const chatSnapShot = await getDocs(userChatRef);
+        const result = true;
+
+        chatSnapShot?.forEach((doc) => {
+            result = !!(doc.data().users.find(user => user === repcipientEmail)?.length > 0 ) ;
+            //if empty turns false
+            if(result) return result;
+        });
+
+        return result;
+       
+        //return !!chatSnapShot?.doc?.find(chat => chat.data().users.find(user => user === repcipientEmail)?.length > 0)
     }
 
     return (
     <Container>
         <Header>
-            <UserAvatar />
+            <UserAvatar onClick={() => signOut(auth) } />
 
             <IconContainer>
                 <IconButton>
