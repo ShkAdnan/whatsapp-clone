@@ -3,10 +3,23 @@ import { useAuthState } from 'react-firebase-hooks/auth'
 import {  db, auth } from './../firebase'
 import Login from './login';
 import Loading from '../components/Loading';
+import { useEffect } from 'react';
+
 
 function MyApp({ Component, pageProps }) {
 
   const [ user, loading  ] = useAuthState(auth);
+
+  //Adding User to Firebase database
+  useEffect(()=> {
+    if( user ){
+      db.collection('users').doc(user.uid).set({
+        email :  user.email,
+        lastSeen : new Date().getTime(),
+        photoUrl : user.photoUrl
+      },{ merge : true })
+    }
+  }, [user]);
 
   if(loading) return <Loading />
 
