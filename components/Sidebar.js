@@ -9,7 +9,6 @@ import { db, auth } from "../firebase";
 import { collection, doc, addDoc, query, where, getDocs, onSnapshot } from "firebase/firestore"; 
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useEffect, useState } from 'react';
-import { async } from "@firebase/util";
 import Chat from "./Chat";
 
 const Sidebar = () => {
@@ -60,7 +59,7 @@ const Sidebar = () => {
     return (
     <Container>
         <Header>
-            <UserAvatar onClick={() => signOut(auth) } />
+            <UserAvatar src={user.photoURL} onClick={() => signOut(auth) } />
 
             <IconContainer>
                 <IconButton>
@@ -81,8 +80,8 @@ const Sidebar = () => {
 
         {/* List of chats */}
         { chats.length > 0 && (
-            chats.map( (chat) => (
-                 <Chat key={chat} user={chat} auth={user} />       
+            chats.map( (chat , index) => (
+                 <Chat key={index} user={chat} auth={user} db={db} />       
             ))
         )}
     </Container>
