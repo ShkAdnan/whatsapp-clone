@@ -81,7 +81,7 @@ const Sidebar = () => {
         {/* List of chats */}
         { chats.length > 0 && (
             chats.map( (chat , index) => (
-                 <Chat key={index} user={chat} auth={user} db={db} />       
+                 <Chat key={index} id="1" user={chat} auth={user} db={db} />       
             ))
         )}
     </Container>

@@ -4,7 +4,7 @@ import { collection, doc, addDoc, query, where, getDocs, onSnapshot } from "fire
 import { useEffect, useState } from "react";
 import { useRouter  } from "next/dist/client/router";
 
-const Chat = ({key, user, auth, db }) => {
+const Chat = ({id, user, auth, db }) => {
 
     const [ authUser, setAuthUser ] = useState([]);
     const router = useRouter();
@@ -15,7 +15,7 @@ const Chat = ({key, user, auth, db }) => {
 
 
     const enterChat = () => {
-        router.push(`/chat/${key}`)
+        router.push(`/chat/${id}`)
     };
 
     useEffect(() => {
