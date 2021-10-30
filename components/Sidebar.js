@@ -6,28 +6,40 @@ import  SearchIcon  from "@material-ui/icons/Search";
 import * as EmailValidator from 'email-validator';
 import { signOut } from "firebase/auth"
 import { db, auth } from "../firebase";
-import { collection, doc, setDoc, query, where, getDocs } from "firebase/firestore"; 
+import { collection, doc, addDoc, query, where, getDocs, onSnapshot } from "firebase/firestore"; 
 import { useAuthState } from "react-firebase-hooks/auth";
-import { useCollection } from "react-firebase-hooks/firestore";
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { async } from "@firebase/util";
+import Chat from "./Chat";
 
 const Sidebar = () => {
     const [ user ] = useAuthState( auth );
     //Checking if chat already exists
     const userChatRef = query(collection(db, "chats"), where("users", "array-contains", user.email));
-    
+    const [ chats , setChat ] = useState([]);
+
+    useEffect( async ()=> {
+        setChat([]);
+        setTimeout( async ()=>{
+            const chatSnapShot = onSnapshot(userChatRef , (querySnapShot) => {
+                querySnapShot.forEach((doc) => {
+                    setChat((pre) => [...pre, ...doc.data().users]);
+                })
+            });
+            
+        },200)
+    },[db]);
+
     const createChat = async () => {
 
         const input = prompt("Please enter email you wish to chat with");
      
         if(!input) return null;
         const chatExists = await chatAlreadyExists(input);
-        console.log(chatExists);
-        return;
-        if(EmailValidator.validate(input) && !chatExists && input != user.email ){
+        
+        if(EmailValidator.validate(input) && !chatExists  && input != user.email ){
             const chats = collection( db , "chats");
-            await setDoc(doc(chats), {
+            await addDoc(chats, {
                 users : [ user.email, input ]
             });
 
@@ -36,16 +48,12 @@ const Sidebar = () => {
 
     const chatAlreadyExists = async (repcipientEmail) => {
         const chatSnapShot = await getDocs(userChatRef);
-        const result = true;
+        const result = [];
 
         chatSnapShot?.forEach((doc) => {
-            result = !!(doc.data().users.find(user => user === repcipientEmail)?.length > 0 ) ;
-            //if empty turns false
-            if(result === true) { return result };
+            result.push (!!(doc.data().users.find(user => user === repcipientEmail)?.length > 0 )) ;
         });
-
-        return result;
-       
+        return result.includes(true) ? true : false
         //return !!chatSnapShot?.doc?.find(chat => chat.data().users.find(user => user === repcipientEmail)?.length > 0)
     }
 
@@ -72,6 +80,11 @@ const Sidebar = () => {
         <SidebarButton onClick={createChat}>Start new chat</SidebarButton>
 
         {/* List of chats */}
+        { chats.length > 0 && (
+            chats.map( (chat) => (
+                 <Chat key={chat} user={chat} auth={user} />       
+            ))
+        )}
     </Container>
     )
 }
