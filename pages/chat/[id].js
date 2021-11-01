@@ -24,20 +24,22 @@ export default Chat;
 
 export async function getServerSideProps(context) {
 
-    const messages = [];
+    
     const ref = doc( db , "chats", context.query.id );
 
     const messageRes = collection(db , "chats", context.query.id, "message") ;
-
-     const chatSnapShot = onSnapshot(messageRes , (querySnapShot) => {
-        querySnapShot.forEach((doc) => {
-            console.log(doc.data());
-             messages.push(doc) ;  
+    const messages = [];
+     onSnapshot(messageRes , (messageSnapShot) => {
+        messageSnapShot.forEach((doc) => {
+            messages.push({
+                id : doc.id,
+                ...doc.data()
+            });
         })
     });
 
     console.log(messages);
-    
+
     // messages.map( doc => ({
     //     id : messages.id,
     //     ...doc.data()
