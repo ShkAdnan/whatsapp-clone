@@ -5,17 +5,15 @@ import { useEffect, useState } from "react";
 import { useRouter  } from "next/dist/client/router";
 
 const Chat = ({id, user, auth, db }) => {
-
     const [ authUser, setAuthUser ] = useState([]);
     const router = useRouter();
-
-    if( auth.email == user ) return null;
+   
     //Getting Details of chat users
-    const userRef = collection(db, "users") ;
+    const userRef = query(collection(db, "users"),where('email' , '==' , user[2])) ;
 
 
     const enterChat = () => {
-        router.push(`/chat/${id}`)
+        router.push(`/chat/${id[0]}`)
     };
 
     useEffect(() => {
@@ -29,11 +27,12 @@ const Chat = ({id, user, auth, db }) => {
                 }
                 userSnapShot.forEach((doc)=>{
                     //doc.data().find( (userData) => { if(userData === user) { setAuthUser(userData)} })
-                    if(doc.data().email == user){
-                        setAuthUser(doc.data())
+                    if(doc.data().email == user[2]){
+                        setAuthUser( doc.data() )
                     }
                 })
             })
+    
         },300); 
     }, [db])
 
@@ -43,10 +42,10 @@ const Chat = ({id, user, auth, db }) => {
                 authUser.photoUrl ? (
                     <UserAvatar src={authUser?.photoUrl} />
                 ) : (
-                    <UserAvatar >{ user.charAt(0) }</UserAvatar>
+                    <UserAvatar >{ user[2].charAt(0)}</UserAvatar>
                 )
             }
-            <p>{user}</p>
+            <p>{user[2]}</p>
         </Container>    
     )
 }

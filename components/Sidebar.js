@@ -16,19 +16,19 @@ const Sidebar = () => {
     //Checking if chat already exists
     const userChatRef = query(collection(db, "chats"), where("users", "array-contains", user.email));
     const [ chats , setChat ] = useState([]);
-
+   
     useEffect( async ()=> {
         setChat([]);
         setTimeout( async ()=>{
             const chatSnapShot = onSnapshot(userChatRef , (querySnapShot) => {
                 querySnapShot.forEach((doc) => {
-                    setChat((pre) => [...pre, ...doc.data().users]);
+                    setChat((pre) => [...pre ,...[[doc.id ,...doc.data().users]] ]);       
                 })
             });
             
         },200)
     },[db]);
-
+  
     const createChat = async () => {
 
         const input = prompt("Please enter email you wish to chat with");
@@ -81,7 +81,7 @@ const Sidebar = () => {
         {/* List of chats */}
         { chats.length > 0 && (
             chats.map( (chat , index) => (
-                 <Chat key={index} id="1" user={chat} auth={user} db={db} />       
+                 <Chat key={index} id={chat} user={chat} auth={user} db={db} />       
             ))
         )}
     </Container>
