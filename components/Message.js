@@ -1,9 +1,13 @@
 import styled from "styled-components";
 
 const Message = ({ message }) => {
-    console.log(message);
+    
     return <Container>
-        <h1>{ message.message }</h1>
+        { message.length > 0 &&
+                message.map((message)=>{
+                  return  <h1>{message.message}</h1> 
+                })
+        }
     </Container>
 }
 

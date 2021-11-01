@@ -19,8 +19,8 @@ const ChatScreen = ({  chat, messages }) => {
     //doc(messageRef, "messages", router.query.id)
   
     const showMessages = () => {    
-        // <Message message={messages}/> 
-        <h1>Working</h1>     
+        return  <Message message={messages}/> 
+            
     }
 
     const sendMessage = async (e) => {
