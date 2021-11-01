@@ -4,8 +4,6 @@ import Sidebar from "../../components/Sidebar";
 import ChatScreen from "../../components/ChatScreen";
 import { collection, doc, addDoc,getDoc, query, where, getDocs, onSnapshot } from "firebase/firestore"; 
 import { db, auth } from "../../firebase";
-import { useEffect } from "react";
-import { async } from "@firebase/util";
 import { useAuthState } from "react-firebase-hooks/auth";
 
 const Chat = ({chat, messages}) => {
@@ -25,11 +23,20 @@ const Chat = ({chat, messages}) => {
 export default Chat;
 
 export async function getServerSideProps(context) {
+
+    const messages = [];
     const ref = doc( db , "chats", context.query.id );
 
-    const messageRes = await doc( ref , "messages", context.query.id)
+    const messageRes = collection(db , "chats", context.query.id, "message") ;
 
-    const messages = await getDoc( messageRes )
+     const chatSnapShot = onSnapshot(messageRes , (querySnapShot) => {
+        querySnapShot.forEach((doc) => {
+            console.log(doc.data());
+             messages.push(doc) ;  
+        })
+    });
+
+    console.log(messages);
     
     // messages.map( doc => ({
     //     id : messages.id,
@@ -51,7 +58,7 @@ export async function getServerSideProps(context) {
   
     return {
         props : {
-            messages : JSON.stringify(messages.id),
+            //messages : JSON.stringify(messages.id),
             chat :  chat
         }
     }
