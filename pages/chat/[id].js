@@ -10,9 +10,6 @@ import { useAuthState } from "react-firebase-hooks/auth";
 
 const Chat = ({chat, messages}) => {
     const [ user ] = useAuthState( auth );
-    const chatWith = () => {
-
-    }
 
     return <Container>
         <Head>
@@ -20,7 +17,7 @@ const Chat = ({chat, messages}) => {
         </Head>
         <Sidebar />
         <ChatContainer>
-            <ChatScreen chat={chat} user={auth}/>
+            <ChatScreen chat={chat} messages={messages} />
         </ChatContainer>
     </Container>
 }

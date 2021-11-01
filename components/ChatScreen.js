@@ -2,17 +2,57 @@ import styled from "styled-components";
 import { useRouter  } from "next/dist/client/router";
 import { Avatar } from "@material-ui/core";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
-import { AttachFile } from "@material-ui/icons";  
+import { AttachFile, InsertEmoticon, Mic } from "@material-ui/icons";  
+import { collection, doc, setDoc, addDoc, getDoc ,query, where, getDocs, onSnapshot, orderBy } from "firebase/firestore"; 
+import { db, auth } from "../firebase";
+import Message from "./Message";
+import { useState } from "react";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { async } from "@firebase/util";
 
-const ChatScreen = ({  chat, user }) => {
-    
+const ChatScreen = ({  chat, messages }) => {
+    const [ user ] = useAuthState( auth );
     const router = useRouter();
-    
+    const [ input , setInput ] = useState("")
+    //const messageRef = collection(db, "chats" , router.query.id);
+    //const mess = query( messageRef, orderBy("timestamp" , "asc") );
+    //doc(messageRef, "messages", router.query.id)
+  
+    const showMessages = () => {    
+        <Message />      
+    }
+
+    const sendMessage = async (e) => {
+        e.preventDefault();
+
+        //update last seen time
+        const users = collection(db, "users");
+
+        await setDoc(doc(users, user.uid), {
+         lastSeen : new Date().getTime()
+        },
+        { merge : true});
+
+        //Add message to chats
+        const chats = collection(db , "chats");
+
+        const newMessage = collection(doc(chats , router.query.id) , "message");
+
+        await addDoc( newMessage  , {
+            timestamp :  new Date().getTime(),
+            message : input,
+            user : user.email,
+            photoUrl : user.photoURL
+        });
+
+        setInput('');
+    }
+
     return <Container>
         <Header>
             <Avatar />
             <HeaderInformation>
-                <h3>Rep Email</h3>
+                <h3>shkadnan</h3>
                 <p>Last seen...</p>
             </HeaderInformation>
             <HeaderIcons>
@@ -27,10 +67,17 @@ const ChatScreen = ({  chat, user }) => {
 
         <MessageContainer >
             {/* Show Messages */}
-
+            
             {/* End of Messages */}
             <EndOfMessages />
         </MessageContainer>
+            <InputContainer>
+                <InsertEmoticon />
+                <Input value={input} onChange={e => setInput(e.target.value)} />
+                <button hidden type="submit" disabled={!input} onClick={sendMessage}>Send Message</button>
+                <Mic />
+            </InputContainer>
+        
     </Container>
 }
 
@@ -68,6 +115,31 @@ const HeaderIcons =  styled.div`
 
 const IconButton = styled.div``;
 
-const MessageContainer = styled.div``;
+const MessageContainer = styled.div`
+    padding : 30px;
+    background-color: #e5ded8;
+    min-height : 90vh
+`;
 
 const EndOfMessages = styled.div``;
+
+const InputContainer =  styled.form`
+    display : flex;
+    align-items : center;
+    padding : 10px;
+    position : sticky;
+    bottom : 0;
+    background-color : white;
+    z-index : 100;
+`;
+
+const Input = styled.input`
+    flex: 1;
+    outline : 0;
+    border : none;
+    border-radius : 10px;
+    padding : 20px;
+    background-color : whitesmoke;
+    margin-left : 15px;
+    margin-right : 15px;
+`;

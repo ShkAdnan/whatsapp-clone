@@ -90,7 +90,21 @@ const Sidebar = () => {
 
 export default Sidebar;
 
-const Container = styled.div``;
+const Container = styled.div`
+    flex : 0.20;
+    border-right: 1px solid whitesmoke;
+    height : 100vh;
+    min-width :200px;
+    max-width:250px
+    overflow-y: scroll;
+
+    ::-webkit-scrollbar{
+        display :none
+    }
+
+    -ms-overflow-style : none;
+    scrollbar-width : none
+`;
 
 const Search = styled.div`
     display:flex;
