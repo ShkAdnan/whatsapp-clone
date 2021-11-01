@@ -1,8 +1,9 @@
 import styled from "styled-components";
 
-const Message = () => {
+const Message = ({ message }) => {
+    console.log(message);
     return <Container>
-        <h1>Working</h1>
+        <h1>{ message.message }</h1>
     </Container>
 }
 

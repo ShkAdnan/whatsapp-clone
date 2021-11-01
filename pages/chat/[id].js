@@ -38,8 +38,6 @@ export async function getServerSideProps(context) {
         })
     });
 
-    console.log(messages);
-
     // messages.map( doc => ({
     //     id : messages.id,
     //     ...doc.data()
@@ -60,7 +58,7 @@ export async function getServerSideProps(context) {
   
     return {
         props : {
-            //messages : JSON.stringify(messages.id),
+            messages : messages,
             chat :  chat
         }
     }
