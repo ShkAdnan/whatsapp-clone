@@ -8,7 +8,7 @@ import { useAuthState } from "react-firebase-hooks/auth";
 
 const Chat = ({chat, messages}) => {
     const [ user ] = useAuthState( auth );
-
+    
     return <Container>
         <Head>
             <title>Chat with { chat.users[1] }</title>
@@ -24,7 +24,6 @@ export default Chat;
 
 export async function getServerSideProps(context) {
 
-    
     const ref = doc( db , "chats", context.query.id );
 
     const messageRes = collection(db , "chats", context.query.id, "message") ;

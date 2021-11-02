@@ -6,21 +6,60 @@ import { AttachFile, InsertEmoticon, Mic } from "@material-ui/icons";
 import { collection, doc, setDoc, addDoc, getDoc ,query, where, getDocs, onSnapshot, orderBy } from "firebase/firestore"; 
 import { db, auth } from "../firebase";
 import Message from "./Message";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { async } from "@firebase/util";
+import moment from "moment";
 
 const ChatScreen = ({  chat, messages }) => {
+
     const [ user ] = useAuthState( auth );
+    const endOfMessagesRef = useRef(null);
     const router = useRouter();
     const [ input , setInput ] = useState("")
-    //const messageRef = collection(db, "chats" , router.query.id);
-    //const mess = query( messageRef, orderBy("timestamp" , "asc") );
-    //doc(messageRef, "messages", router.query.id)
-  
+    const [ currentMessages , setCurrentMessages ] = useState([]);
+    const [ repEmail , setRepEmail ] = useState("");
+    const [ userChat , setUserChat ] = useState("");
+    
+    useEffect(async () => {
+        //Get Current messages
+        const messageRes = query(collection(db , "chats", router.query.id, "message") , orderBy('timestamp')) ;
+         await onSnapshot(messageRes , (messageSnapShot) => {
+            setCurrentMessages([]);
+            messageSnapShot.forEach((doc) => {
+              setCurrentMessages((pre => [...pre , [doc.id , doc.data() ] ]))
+            })
+        });
+
+        //Rep Email 
+        if(chat.users != user) setRepEmail(chat.users[1]);
+
+        const userChatRef = query(collection(db, "users"), where("email", "==", repEmail));
+        const userDetails = await getDocs(userChatRef);
+
+        userDetails?.forEach((doc)=>{
+            setUserChat(doc.data());
+        })
+
+    },[router.query.id , db]);
+
     const showMessages = () => {    
-        return  <Message message={messages}/> 
+        if(currentMessages){
+            return currentMessages.map(( message ) => (
+                <Message key={message[1].timestamp} user={message[1].user} message={message[1].message} timestamp={message[1].timestamp} />
+            ));
+        }else{
+            return messages.map(( message ) => (
+                <Message key={message.id} user={message.user} message={message.message} timestamp={message.timestamp}/>
+            ));
+        }
             
+    }
+
+    const scrollToBottom = () => {
+        endOfMessagesRef.current.scrollIntoView({
+            behavior : "smooth",
+            block : "start"
+        })   
     }
 
     const sendMessage = async (e) => {
@@ -47,14 +86,30 @@ const ChatScreen = ({  chat, messages }) => {
         });
 
         setInput('');
+        scrollToBottom();  
     }
 
     return <Container>
         <Header>
-            <Avatar />
+        {
+             userChat.photoUrl ? (
+                    <Avatar src={userChat?.photoUrl} />
+                ) : (
+                    <Avatar >{ repEmail.charAt(0)}</Avatar>
+                )
+            }
             <HeaderInformation>
-                <h3>shkadnan</h3>
-                <p>Last seen...</p>
+                <h3>{ repEmail }</h3>
+                { userChat ? (
+                    <p>Last seen: { '  ' }
+                {userChat?.lastSeen ? (
+                    // <TimeAgo datetime={userChat?.lastSeen} />
+                     moment(userChat?.lastSeen).format('LT') 
+                ) : "Unavailable"}</p>
+                ) : (
+                    <p>Loading Last Active ...</p>
+                )}
+                
             </HeaderInformation>
             <HeaderIcons>
                 <IconButton>
@@ -70,7 +125,7 @@ const ChatScreen = ({  chat, messages }) => {
             {/* Show Messages */}
             { showMessages() }
             {/* End of Messages */}
-            <EndOfMessages />
+            <EndOfMessages ref={endOfMessagesRef}/>
         </MessageContainer>
             <InputContainer>
                 <InsertEmoticon />
