@@ -1,3 +1,3 @@
-# Whatsapp Clone using NExt.js + Styled Components + Firebase
+# Whatsapp Clone using Next.js + Styled Components + Firebase
 
 ![Screenshot](ScreenShot.PNG)
